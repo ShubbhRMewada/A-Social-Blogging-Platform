@@ -1,7 +1,7 @@
 # IITM-Capstone_Project-Blog-Lite
 
 
-<strong>Description:</strong>
+##Description:
   A multiuser social media-like web application for uploading blogs, photographs, and posts, among other things.
   Since this is a Multi-User Social Media Platform, 
   it should be capable of handling large volumes of data efficiently whilst also being aesthetically attractive. 
