@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="content-section">
+    <legend class="border-bottom mb-4">Followers</legend>
+    {% for user in servents %}
+    <article class="media content-section">
+        <img class="rounded-circle article-img"
+            src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}">
+        <div class="media-body">
+            <a class="mr-2" href="{{ url_for('profile',user_id=user.id)}}">{{ user.username }}</a>
+            <div style="text-align:right">
+                {% if user.id in masters %}
+                <a class="btn btn-secondary btn-sm mt-1 mb-1 btn btn-danger btn-sm m-1"
+                    href="{{ url_for('unfollow',user_id=user.id)}}">Unfollow</a>
+                {% else %}
+                <a class="btn btn-secondary btn-sm mt-1 mb-1 btn-success"
+                    href="{{ url_for('follow',user_id=user.id)}}">Follow</a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% endblock content %}

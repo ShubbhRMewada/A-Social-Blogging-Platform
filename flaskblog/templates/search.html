@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-section">
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Search Users</legend>
+        {% if available_users != 'search' and available_users %}
+        {% set servent = current_user.id %}
+        {% for user in available_users %}
+        {% set master = user.id %}
+        <div class="content-section">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-xs-12 col-sm-12">
+                    <img class="rounded-circle account-img" src="/static/profile_pics/{{user.image_file}}">
+                </div>
+                <div class="col-lg-8 col-md-8 col-xs-12 col-sm-12">
+                    <div class="row mt-10">
+                        <div class="col-md-12 col-xs-12 col-sm-12">
+                            <a href="{{url_for('profile',user_id=user.id)}}">
+                                <h5 class="account-heading">{{ user.username }}</h5>
+                            </a>
+                            <p class="text-secondary">{{ user.email }}</p>
+                        </div>
+
+                        <div class="col-md-4 col-xs-12 col-sm-12">
+                            <small class="border-bottom mb-4">{{Master_Servent.query.filter_by(master=user.id).count()}}
+                                <a href="{{url_for('followers',user_id=user.id)}}">Followers</a></small>
+                        </div>
+                        <div class="col-md-4 col-xs-12 col-sm-12">
+                            <small
+                                class="border-bottom mb-4">{{Master_Servent.query.filter_by(servent=user.id).count()}}
+                                <a href="{{url_for('following',user_id=user.id)}}">Following</a></small>
+                        </div>
+                        <div class="col-md-4 col-xs-12 col-sm-12">
+                            {% set count = namespace(value=0) %}
+                            {% for i in user.posts %}
+                            {% set count.value = count.value + 1 %}
+                            {% endfor %}
+                            <small class="border-bottom    mb-4">{{count.value}} <a
+                                    href="/profile/{{user.id}}#post">Posts</a></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if master != servent %}
+            {% if master in masters %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-1 btn btn-danger btn-sm m-1"
+                href="{{ url_for('unfollow',user_id=user.id)}}">Unfollow</a>
+            {% else %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-1 btn-success m-1"
+                href="{{ url_for('follow',user_id=user.id)}}">Follow</a>
+            {% endif %}
+
+            {% else %}
+            <a class="btn btn btn-primary btn-sm mt-1 mb-1 " href="{{ url_for('profile',user_id=user.id)}}">This is
+                you.</a>
+
+            {% endif %}
+        </div>
+    </fieldset>
+    {% endfor %}
+
+    {% else %}
+    {% if available_users != 'search' %}
+    <div class="alert alert-danger" role="alert" </div>
+        <h5>Username '{{ form.key.data }}' does not exists!</h5>
+    </div>
+
+    {% endif %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.key.label(class="form-control-label") }}
+            {{ form.key(class="form-control form-control-lg")}}
+        </div>
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+    </form>
+    {% endif %}
+
+</div>
+
+
+
+{% endblock content %}

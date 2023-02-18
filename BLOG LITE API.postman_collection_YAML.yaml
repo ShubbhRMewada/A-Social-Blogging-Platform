@@ -1,0 +1,436 @@
+info:
+  _postman_id: fb271f2d-332e-44e5-afeb-04992196d6f9
+  name: BLOG LITE API
+  description: >-
+    # This API uses CRUD operations on the databases used for developing BLOG
+    LITE website.
+
+
+    ## This is a part of my project for the course **Modern Application
+    Development -1** of **BS. in Data Science and its applications by Indian
+    Institute of Technology-Madras .**
+
+
+    This is the program which when executed will act as a server and ask for
+    requests.  
+
+    This program is solely developed by MEWADA SHUBBH RAJESH
+    ([21f1005150@student.onlinedegree.iitm.ac.in](mailto:21f1005150@student.onlinedegree.iitm.ac.in))
+    for examining the working of the BLOG LITE API.
+
+
+    ``` python
+
+    from flask import Flask
+
+    from flask_restful import Resource, Api, reqparse, abort, fields,
+    marshal_with
+
+    from flask_sqlalchemy import SQLAlchemy
+
+    from datetime import datetime
+
+    from flaskblog import bcrypt
+
+    app = Flask(__name__)
+
+    api = Api(app)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
+
+    db = SQLAlchemy(app)
+
+    # For User Interaction.
+
+    user_resource_fields = {
+        'id':fields.Integer,
+        'username':fields.String,
+        'email':fields.String,
+        'password':fields.String
+    }
+
+    class User(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        username = db.Column(db.String(20), unique=True, nullable=False)
+        email = db.Column(db.String(120), unique=True, nullable=False)
+        image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+        password = db.Column(db.String(60), nullable=False)
+        # posts = db.relationship('Post', backref='author', lazy=True)
+    user_put_args = reqparse.RequestParser()
+
+    user_put_args.add_argument("username", type=str, help="Username is
+    required")
+
+    user_put_args.add_argument("email", type=str, help="Email is required")
+
+    user_put_args.add_argument("password", type=str, help="Password is
+    required")
+
+    user_put_args.add_argument("image_file", type=str, help="Image is required")
+
+    user_post_args = reqparse.RequestParser()
+
+    user_post_args.add_argument("username", type=str, help="Username is
+    required",required=True)
+
+    user_post_args.add_argument("email", type=str, help="Email is
+    required",required=True)
+
+    user_post_args.add_argument("password", type=str, help="Password is
+    required",required=True)
+
+    user_post_args.add_argument("image_file", type=str, help="Image is
+    required")
+
+    class User_API(Resource):
+        @marshal_with(user_resource_fields)
+        def get(self,id):
+            user = User.query.filter_by(id=id).first()
+            if user:
+                return user
+            return abort(409, message="User Doesn't exists")
+        @marshal_with(user_resource_fields)
+        def put(self,id):
+            args = user_put_args.parse_args()
+            user = User.query.filter_by(id=id).first()
+            if user:
+                if args['username']:
+                    user.username = args['username'] 
+                if args['email']:
+                        user.email = args['email'] 
+                if args['password']:
+                    hashed_password = bcrypt.generate_password_hash(args['password']).decode('utf-8')
+                    user.password = hashed_password
+                if args['image_file']:
+                    user.image_file = args['image_file'] 
+                db.session.commit()
+                return user
+            return abort(409, message="User Doesn't exists")  
+        @marshal_with(user_resource_fields)
+        def post(self,id):
+            args = user_post_args.parse_args()
+            user = User.query.filter_by(id=id).first()
+            if user:
+                return abort(409, message="User Already exists")
+            hashed_password = bcrypt.generate_password_hash(args['password']).decode('utf-8')
+            user = User(username=args['username'],email=args['email'],password=hashed_password)
+            db.session.add(user)
+            db.session.commit()
+            return user
+        @marshal_with(user_resource_fields)
+        def delete(self, id):
+            user = User.query.filter_by(id=id).first()
+            if user:
+                db.session.delete(user)
+                db.session.commit()
+                return user 
+            return abort(409, message="User Doesn't exists")
+    # For getting all the users.
+
+    class All_User_API(Resource):
+        @marshal_with(user_resource_fields)
+        def get(self):
+            user = User.query.all()
+            return user
+    # For Post Interaction
+
+    post_resource_fields = {
+        'id':fields.Integer,
+        'title':fields.String,
+        'date_posted':fields.String,
+        'content':fields.String,
+        # 'user_id':fields.String,
+        'image_file':fields.String
+    }
+
+    class Post(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        title = db.Column(db.String(100), nullable=False)
+        date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+        content = db.Column(db.Text, nullable=False)
+        # user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+        image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    post_put_args = reqparse.RequestParser()
+
+    post_put_args.add_argument("title", type=str, help="Title is required")
+
+    post_put_args.add_argument("content", type=str, help="Content is required")
+
+    # post_put_args.add_argument("user_id", type=int, help="UserID is required")
+
+    post_put_args.add_argument("image_file", type=str, help="Image is required")
+
+    post_post_args = reqparse.RequestParser()
+
+    post_post_args.add_argument("title", type=str, help="Title is
+    required",required=True)
+
+    post_post_args.add_argument("content", type=str, help="Content is
+    required",required=True)
+
+    # post_post_args.add_argument("user_id", type=int, help="UserID is
+    required")
+
+    post_post_args.add_argument("image_file", type=str, help="Image is
+    required")
+
+    class Post_API(Resource):
+        @marshal_with(post_resource_fields)
+        def get(self,id):
+            post = Post.query.filter_by(id=id).first()
+            if post:
+                return post
+            return abort(409, message="Post Doesn't exists")
+        @marshal_with(post_resource_fields)
+        def put(self,id):
+            args = post_put_args.parse_args()
+            post = Post.query.filter_by(id=id).first()
+            if post:
+                if args['title']:
+                    post.title = args['title'] 
+                if args['content']:
+                    post.content = args['content'] 
+                # if args['user_id']:
+                #     post.user_id = args['user_id'] 
+                if args['image_file']:
+                    post.image_file = args['image_file'] 
+                db.session.commit()
+                return post
+            return abort(409, message="Post Doesn't exists")  
+        @marshal_with(post_resource_fields)
+        def post(self,id):
+            args = post_post_args.parse_args()
+            post = Post.query.filter_by(id=id).first()
+            if post:
+                return abort(409, message="Post Already exists")
+            # post = Post(title=args['title'],content=args['content'],user_id=args['user_id'],image_file=args['image_file'])
+            post = Post(title=args['title'],content=args['content'],image_file=args['image_file'])
+            db.session.add(post)
+            db.session.commit()
+            return post
+        @marshal_with(post_resource_fields)
+        def delete(self, id):
+            post = Post.query.filter_by(id=id).first()
+            if post:
+                db.session.delete(post)
+                db.session.commit()
+                return post 
+            return abort(409, message="Post Doesn't exists")
+    class All_Post_API(Resource):
+        @marshal_with(post_resource_fields)
+        def get(self):
+            post = Post.query.all()
+            return post
+    api.add_resource(User_API,'/user/')
+
+    api.add_resource(All_User_API,'/user')
+
+    api.add_resource(Post_API,'/posts/')
+
+    api.add_resource(All_Post_API,'/posts')
+
+    db.create_all()
+
+    if __name__ == "__main__":
+        app.run(debug=True)
+
+    ```
+  schema: https://schema.getpostman.com/json/collection/v2.1.0/collection.json
+  _exporter_id: '25129724'
+item:
+  - name: Create New Post
+    request:
+      method: POST
+      header: []
+      body:
+        mode: raw
+        raw: "{\r\n    \"title\": \"Post Number 1\",\r\n    \"content\": \"Content for Post Number 1\"\r\n}"
+        options:
+          raw:
+            language: json
+      url:
+        raw: http://127.0.0.1:5000/posts/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - posts
+          - '1'
+      description: |-
+        ``` python
+        #Structure of the table Post is as follow :
+        class Post(db.Model):
+            id = db.Column(db.Integer, primary_key=True)
+            title = db.Column(db.String(100), nullable=False)
+            date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+            content = db.Column(db.Text, nullable=False)
+            image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+
+        ```
+
+        ``` json
+        Response will be as follow :
+        {
+            "id": 1,
+            "title": "Post Number 1",
+            "date_posted": "2022-12-30 14:54:34.916201",
+            "content": "Content for Post Number 1",
+            "image_file": "default.jpg"
+        }
+
+        ```
+    response: []
+  - name: Read Existing Post
+    protocolProfileBehavior:
+      disableBodyPruning: true
+    request:
+      method: GET
+      header: []
+      body:
+        mode: raw
+        raw: ''
+        options:
+          raw:
+            language: json
+      url:
+        raw: http://127.0.0.1:5000/posts/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - posts
+          - '1'
+    response: []
+  - name: Update Existing Post
+    request:
+      method: PUT
+      header: []
+      body:
+        mode: raw
+        raw: "{\r\n    \"title\":\"This title is updated using PUT method.\",\r\n    \"content\":\"This content is updated using PUT method.\"\r\n}"
+        options:
+          raw:
+            language: json
+      url:
+        raw: http://127.0.0.1:5000/posts/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - posts
+          - '1'
+    response: []
+  - name: Delete Existing Post
+    request:
+      method: DELETE
+      header: []
+      url:
+        raw: http://127.0.0.1:5000/posts/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - posts
+          - '1'
+    response: []
+  - name: Create New User
+    request:
+      method: POST
+      header: []
+      body:
+        mode: raw
+        raw: "{\r\n    \"username\":\"Shubbh\",\r\n    \"email\":\"shubbhrmewada@gmail.com\",\r\n    \"password\":\"12345\"\r\n}"
+        options:
+          raw:
+            language: json
+      url:
+        raw: http://127.0.0.1:5000/user/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - user
+          - '1'
+    response: []
+  - name: Read Existing User
+    protocolProfileBehavior:
+      disableBodyPruning: true
+    request:
+      method: GET
+      header: []
+      body:
+        mode: raw
+        raw: ''
+      url:
+        raw: http://127.0.0.1:5000/user/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - user
+          - '1'
+    response: []
+  - name: Update Existing User
+    request:
+      method: PUT
+      header: []
+      body:
+        mode: raw
+        raw: "{\r\n    \"username\":\"New Username\",\r\n    \"email\":\"new.email@put.com\"\r\n}"
+        options:
+          raw:
+            language: json
+      url:
+        raw: http://127.0.0.1:5000/user/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - user
+          - '1'
+    response: []
+  - name: Delete Existing User
+    request:
+      method: DELETE
+      header: []
+      url:
+        raw: http://127.0.0.1:5000/user/1
+        protocol: http
+        host:
+          - '127'
+          - '0'
+          - '0'
+          - '1'
+        port: '5000'
+        path:
+          - user
+          - '1'
+    response: []

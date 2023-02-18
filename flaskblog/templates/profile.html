@@ -1,0 +1,123 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="content-section">
+    <div class="row">
+        <div class="col-lg-4 col-md-4 col-xs-12 col-sm-12">
+            <img class="rounded-circle account-img" src="/static/profile_pics/{{user.image_file}}">
+        </div>
+        <div class="col-lg-8 col-md-8 col-xs-12 col-sm-12">
+            <div class="row mt-10">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+                    <h5 class="account-heading">{{ user.username }}</h5>
+                    <p class="text-secondary">{{ user.email }}</p>
+                </div>
+
+                <div class="col-md-4 col-xs-12 col-sm-12">
+                    <h6 class="border-bottom mb-4">{{followers}} <a
+                            href="{{url_for('followers',user_id=user.id)}}">Followers</a></h6>
+                </div>
+                <div class="col-md-4 col-xs-12 col-sm-12">
+                    <h6 class="border-bottom mb-4">{{following}} <a
+                            href="{{url_for('following',user_id=user.id)}}">Following</a></h6>
+                </div>
+                <div class="col-md-4 col-xs-12 col-sm-12">
+                    {% set count = namespace(value=0) %}
+                    {% for i in user.posts %}
+                    {% set count.value = count.value + 1 %}
+                    {% endfor %}
+                    <h6 class="border-bottom    mb-4">{{count.value}} <a href="/profile/{{user.id}}#post">Posts</a></h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="media-body">
+        {% if current_user.id != user.id %}
+        {% if is_follower %}
+        <a class="btn btn-secondary btn-sm mt-1 mb-1 btn btn-danger btn-sm m-1"
+            href="{{ url_for('unfollow',user_id=user.id)}}">Unfollow</a>
+        {% else %}
+        <a class="btn btn-secondary btn-sm mt-1 mb-1 btn-success"
+            href="{{ url_for('follow',user_id=user.id)}}">Follow</a>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+<div class="content-section" id="post" name="post">
+    <legend class="border-bottom mb-4">Posts</legend>
+    {% if post %}
+    {% for i in post %}
+    <article class="media content-section">
+        <img class="rounded-circle article-img"
+            src="{{ url_for('static', filename='profile_pics/' + i.author.image_file) }}">
+        <div class="media-body">
+            <div class="article-metadata">
+                <a class="mr-2" href="#">{{ i.author.username }}</a>
+                <small>{{ i.date_posted.strftime('%Y-%m-%d') }}</small>
+            </div>
+            {% if i.image_file != 'default.jpg' %}
+            <img class="img-fluid img-thumbnail" src="{{ url_for('static', filename='post_images/' + i.image_file) }}"
+                alt="Image selected by {{i.author.username}}">
+            {% endif %}
+            <h2><a class="article-title" href="{{ url_for('post', post_id=i.id) }}">{{ i.title }}</a></h2>
+            <div class="row">
+                <div class="col-md-4 col-lg-4 col-sm-6 col-xs-6">
+                    <b> {{Like.query.filter_by(post_id=i.id).count()}} </b>
+                    {% if Like.query.filter_by(post_id=i.id, user_id=current_user.id).first() %}
+                    <a href="{{url_for('like',post_id=i.id)}}"></a>
+                    <button class="btn btn-outline-success " role="button" aria-pressed="true">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-arrow-through-heart-fill" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M2.854 15.854A.5.5 0 0 1 2 15.5V14H.5a.5.5 0 0 1-.354-.854l1.5-1.5A.5.5 0 0 1 2 11.5h1.793l3.103-3.104a.5.5 0 1 1 .708.708L4.5 12.207V14a.5.5 0 0 1-.146.354l-1.5 1.5ZM16 3.5a.5.5 0 0 1-.854.354L14 2.707l-1.006 1.006c.236.248.44.531.6.845.562 1.096.585 2.517-.213 4.092-.793 1.563-2.395 3.288-5.105 5.08L8 13.912l-.276-.182A23.825 23.825 0 0 1 5.8 12.323L8.31 9.81a1.5 1.5 0 0 0-2.122-2.122L3.657 10.22a8.827 8.827 0 0 1-1.039-1.57c-.798-1.576-.775-2.997-.213-4.093C3.426 2.565 6.18 1.809 8 3.233c1.25-.98 2.944-.928 4.212-.152L13.292 2 12.147.854A.5.5 0 0 1 12.5 0h3a.5.5 0 0 1 .5.5v3Z" />
+                        </svg>
+                        <path
+                            d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z" />
+                        </svg>
+
+                    </button>
+                    </a>
+                    {% else %}
+                    <a href="{{url_for('like',post_id=i.id)}}">
+                        <button class="btn btn-outline-danger " role="button" aria-pressed="true">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z" />
+                            </svg>
+
+                        </button>
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 col-lg-4 col-sm-6 col-xs-6">
+                    <b>{{Comment.query.filter_by(post_id=i.id).count()}}</b>
+                    <a href="/post/{{i.id}}#post">
+                        <button class="btn btn-outline-primary" role="button" aria-pressed="true">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                class="bi bi-chat-text-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM4.5 5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z" />
+                            </svg>
+
+                        </button>
+                    </a>
+                </div>
+            </div>
+    </article>
+    {% endfor %}
+    {% else %}
+
+    <div class="content-section" style="background-color: lightgreen;">
+        <pre><h6>Greetings,</br>Looks like you have not posted anything'!</br>Try "New Post" option to post anything you like.</h6></pre>
+    </div>
+
+    {% endif %}
+
+
+
+</div>
+{% endblock %}

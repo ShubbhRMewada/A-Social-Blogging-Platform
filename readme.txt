@@ -1,0 +1,32 @@
+Hello Proctors,
+This file contains information on how to run the BLOG LITE website.
+
+I have deleted the database before project submission so please follow the given steps for smooth execution of my project.
+
+Step-0: 
+Your Present working directory should be "\MAD-1 Project\Project Folder"
+Please install all of the modules listed in "requirements.txt" using the following command
+    "pip install -r requirements.txt"
+
+Step-1:
+Please use "cd \MAD-1 Project\Project Folder" and turn on the interactive python mode from your terminal.
+
+Step-2:
+Inside the interactive python mode use the following syntax:
+    "from flaskblog.routes import db"
+followed by
+    "db.create_all()"
+
+Step-3:
+Exit the interactive python mode using "Ctrl-Z"
+
+Step-4:
+You will find a "run.py" file in your current working directory.
+Run the "run.py" file and open the BLOG LITE website on the localhost suggested by the terminal.
+
+Step-5:
+Since the database is empty, you will be the first user.
+Register yourself and perform all the functionalities you want to!
+
+Thank you for your time!
+I hope that you'll like my project.
