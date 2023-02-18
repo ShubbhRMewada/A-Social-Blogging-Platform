@@ -1,7 +1,7 @@
 # IITM-Capstone_Project-Blog-Lite
 
 
-##Description:
+Description:
   A multiuser social media-like web application for uploading blogs, photographs, and posts, among other things.
   Since this is a Multi-User Social Media Platform, 
   it should be capable of handling large volumes of data efficiently whilst also being aesthetically attractive. 
@@ -9,7 +9,7 @@
   I have made every effort to bring them all into action.
 
 
-<strong>Technologies used:</strong>
+Technologies used:
   
   For Front-End/User-Interface development: 
     HTML, CSS, Bootstrap:
@@ -17,8 +17,8 @@
       All of the elements, classes, and ids used in the ".html" file are given unique properties in a single ".css" file. 
       Bootstrap was employed to enhance the platform's appearance, interactivity, and functionality. 
       Bootstrap comes with features such as a sidebar, buttons, icons, and so forth.
-
-    Jinja2:
+      
+   Jinja2:
       I'm pleased that we were able to employ this templating language. 
       It structured recurring needed parts such as the Sidebar for user engagement.
       The template inheritance feature of Jinja2 enabled the development of a specific interface design that should be consistent throughout the user's experience. 
